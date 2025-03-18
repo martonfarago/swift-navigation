@@ -37,7 +37,7 @@
       self._path = path.path
       let root = root()
       self.root = root
-      self.viewControllers = [root]
+      self.viewControllers = []
     }
 
     public required init(
@@ -50,7 +50,7 @@
       self._path = path.elements
       let root = root()
       self.root = root
-      self.viewControllers = [root]
+      self.viewControllers = []
     }
 
     public required init?(coder aDecoder: NSCoder) {
@@ -86,7 +86,11 @@
           case let .insert(newPath.count - 1, navigationID, nil) = difference.first,
           let viewController = viewController(for: navigationID)
         {
-          pushViewController(viewController, animated: !transaction.uiKit.disablesAnimations)
+          if viewControllers.isEmpty, let root {
+            setViewControllers([root, viewController], animated: !transaction.uiKit.disablesAnimations)
+          } else {
+            pushViewController(viewController, animated: !transaction.uiKit.disablesAnimations)
+          }
         } else if difference.count == 1,
           case .remove(newPath.count, _, nil) = difference.first
         {
@@ -151,7 +155,7 @@
           if !invalidIndices.isEmpty {
             path.remove(atOffsets: invalidIndices)
           }
-          setViewControllers(newViewControllers, animated: !transaction.uiKit.disablesAnimations)
+          setViewControllers(newViewControllers, animated: false)
         }
       }
     }
